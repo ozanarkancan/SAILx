@@ -1,5 +1,5 @@
-using Base.Collections
-using Base.Collections: PriorityQueue
+using DataStructures
+
 include("util.jl")
 
 #recursive backtracking algorithm
@@ -139,7 +139,7 @@ function astar_solver(maze, available, start, goal)
     end
 
     closed = Set()
-    open = PriorityQueue{Array{Float64, 1}, Float64, Base.Order.ForwardOrdering}()
+    open = PriorityQueue{Array{Float64, 1}, Float64}()
 
     parent = Dict()
     path_cost = Dict()
@@ -149,12 +149,12 @@ function astar_solver(maze, available, start, goal)
     heuristic[start] = norm(start - goal)
     parent[start] = [0.0, 0.0]
 
-    Collections.enqueue!(open, start, path_cost[start] + heuristic[start])
+    enqueue!(open, start, path_cost[start] + heuristic[start])
 
     current = nothing
 
     while length(open) != 0
-        current = Collections.dequeue!(open)
+        current = dequeue!(open)
 
         if current == goal; break; end
 
@@ -173,7 +173,7 @@ function astar_solver(maze, available, start, goal)
             else
                 path_cost[n] = path_cost[current] + 1
                 heuristic[n] = norm(n- goal)
-                Collections.enqueue!(open, n, path_cost[n] + heuristic[n])
+                enqueue!(open, n, path_cost[n] + heuristic[n])
                 parent[n] = current
             end
         end
