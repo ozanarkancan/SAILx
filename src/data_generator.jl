@@ -22,7 +22,7 @@ function turn_to_x(name, id)
         nodes, path = generate_path(maze, available)
         segments = segment_path(nodes)
         gen = generate_lang(navimap, maze, segments; combine=0.0, cons=[visual_t])
-        
+
         if rand() <= 0.3
             reverse!(gen)
         end
@@ -156,7 +156,7 @@ function turn_to_x_and_move(name, id)
 
         nodes, path = generate_path(maze, available)
         segments = segment_path(nodes)
-        
+
         mname = join(rand(CHARS, 40))
         navimap.name = mname
 
@@ -189,7 +189,7 @@ function turn_move_to_x(name, id)
 
         nodes, path = generate_path(maze, available)
         segments = segment_path(nodes)
-        
+
         mname = join(rand(CHARS, 40))
         navimap.name = mname
 
@@ -622,7 +622,7 @@ all_classes : random task
 function generatedata(taskf; numins=100)
     data = Any[]
     mps = Dict()
-    
+
     inscount = 0
     while inscount < numins
         inscount += 1
@@ -638,33 +638,69 @@ function generatedata(taskf; numins=100)
     return data, mps
 end
 
-function parse_commandline(argv)
-    isa(argv, AbstractString) && (argv=split(argv))
-    s = ArgParseSettings()
-
-    @add_arg_table s begin
-	("--log"; help = "name of the log file"; default = "test.log")
-    end
-    return parse_args(argv,s)
-end
-
-function testgeneratedata(argv=ARGS)
-    args = parse_commandline(argv)
-    Logging.configure(filename=args["log"])
-    Logging.configure(level=INFO)
+"""
+Collection::Dict{Instruction, Dict{Length, Set{String representation of a path}}}
+"""
+function generate_unique_data(taskf; numins=100)
+    collection = Dict{String, Dict{Int, Set{String}}}()
     
-    for i=1:100
-        info("i: $i")
-        dat, maps = generatedata(turnToX)
-        for ins in dat
-            m = maps[ins.map]
-            fs = filter(t->m.nodes[t] != 7, collect(keys(m.nodes)))
-            @assert length(fs) != 0
-            its = map(t->m.nodes[t], fs)
+    #check whether new instance in the collection or not
+    #add the new instance to the collection if it is not in the collection
+    function is_in_collection!(map, instance)
+        #generates string representation of the path
+        function get_path_rep()
+            rep = ""
+            for curr in instance.path
+                view = state_agent_centric(map, curr)
+                rep = rep * string(view)
+            end
+            return rep
+        end
 
-            @assert length(its) == length(Set(its))
+        in_collection = true
+        text = join(instance.text, " ")
+        rep = get_path_rep()
+
+        if haskey(collection, text)
+            if haskey(collection[text], length(instance.path))
+                set = collection[text][length(instance.path)]
+                if !(rep in set)
+                    push!(set, rep)
+                    in_collection = false
+                end
+            else
+                collection[text][length(instance.path)] = Set{String}([rep])
+                in_collection = false
+            end
+        else
+            collection[text] = Dict{Int, Set{String}}(length(instance.path) => Set{String}([rep]))
+            in_collection = false
+        end
+        return in_collection
+    end
+
+    data = Any[]
+    mps = Dict()
+
+    inscount = 0
+    while inscount < numins
+        name = string(taskf, "_", inscount)
+
+        inslist, mp = taskf(name, inscount)
+        for instance in inslist
+            if !(is_in_collection!(mp, instance))
+                push!(data, instance)
+                mps[mp.name] = mp
+                inscount += 1
+            else
+                println("$inscount ** In the collection")
+            end
+
+            if inscount == numins
+                break
+            end
         end
     end
 
-    info("PASSED")
+    return data, mps
 end
