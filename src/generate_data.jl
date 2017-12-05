@@ -48,7 +48,10 @@ function ins2dict(ins)
     d = Dict()
     d["fname"] = ins.fname
     d["text"] = ins.text
-    d["path"] = string(ins.path)[4:end]
+    pathtext = string(ins.path)
+    ind1 = findfirst(pathtext, '[')
+    ind2 = findfirst(pathtext, ']')
+    d["path"] = pathtext[ind1:ind2]
     d["map"] = ins.map
     d["id"] = ins.id
     return d
