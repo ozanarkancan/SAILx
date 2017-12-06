@@ -13,14 +13,14 @@ function main(args=ARGS)
         ("--ofolder"; default="../dataset/"; help="the parent folder to save the data")
         ("--seed"; default=170523; arg_type=Int; help="random seed")
         ("--unique"; help = "generate unique instances"; action = :store_true)
-        ("--ratio"; help = "split data into training, development and test dataset"; arg_type=Float64; nargs='+')
+        ("--ratio"; help = "split data into training, development and test dataset"; default=[0.0]; arg_type=Float64; nargs='+')
     end
 
     isa(args, AbstractString) && (args=split(args))
     o = parse_args(args, s)
     o["seed"] > 0 && srand(o["seed"])
 
-    if o["ratio"] != nothing
+    if o["ratio"] != [0.0]
         splitdataset(o["folder"], o["ofolder"], o["ratio"])
     else
         !ispath(o["folder"]) && mkdir(o["folder"])
