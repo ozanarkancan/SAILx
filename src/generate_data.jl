@@ -7,7 +7,7 @@ function main(args=ARGS)
     s.description = "Generate navigational instructions and corresponding worlds"
     s.exc_handler=ArgParse.debug_handler
     @add_arg_table s begin
-        ("--num"; arg_type=Int; default=10; help="number of instances")
+        ("--num"; nargs='+'; arg_type=Int; default=[10]; help="number of instances")
         ("--tasks"; nargs='+'; default=defaults; help="tasks")
         ("--folder"; default="../data/"; help="the parent folder to save the data")
         ("--ofolder"; default="../dataset/"; help="the parent folder to save the data")
@@ -27,11 +27,14 @@ function main(args=ARGS)
 
         tasks = map(t->eval(parse(t)), o["tasks"])
         gdata = o["unique"] ? generate_unique_data : generatedata
+        if length(o["num"]) != length(o["tasks"])
+            o["num"] = map(x->o["num"][1], o["tasks"])
+        end
 
-        for t in tasks
+        for (t,n) in zip(tasks, o["num"])
             folder = string(o["folder"], t)
             !ispath(folder) && mkdir(folder)
-            instructions, maps = gdata(t; numins=o["num"])
+            instructions, maps = gdata(t; numins=n)
             insdicts = map(ins2dict, instructions)
 
             file = open(string(folder, "/instructions.json"), "w")
