@@ -358,7 +358,7 @@ function moveins(navimap, maze, curr, next; cons=[])
         end
 
         @inbounds for m in ["move ", "go ", "walk "]
-            @inbounds for adv in ["forward ", "straight ", ""]
+            @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                 push!(cands, (string(m, adv, "as far as you can"), visual_m))
                 @inbounds for unt in ["until ", "until you get to ", " until you reach ", " to "]
                     push!(cands, (string(m, adv, unt, "the wall"), visual_m))
@@ -381,7 +381,7 @@ function moveins(navimap, maze, curr, next; cons=[])
         end
 
         @inbounds for m in ["move ", "go ", "walk "]
-            @inbounds for adv in [" forward", " straight", ""]
+            @inbounds for adv in [" forward", " straight", "ahead ", ""]
                 @inbounds for emp in emptylist
                     @inbounds for prep in [" into the$emp corner", " to the$emp corner", " to the next corner"]
                         @inbounds for suffix in ["", " you see in front of you"]
@@ -400,7 +400,7 @@ function moveins(navimap, maze, curr, next; cons=[])
 
     if is_deadend(maze, p2) && (length(cons) == 0 || visual_m in cons)
         @inbounds for m in ["move ", "go ", "walk "]
-            @inbounds for adv in ["forward", "straight", ""]
+            @inbounds for adv in ["forward", "straight", "ahead ", ""]
                 push!(cands, (string(m, adv, " into the dead end"), visual_m))
                 push!(cands, (string(m, adv, " into the deadend"), visual_m))
                 
@@ -423,7 +423,7 @@ function moveins(navimap, maze, curr, next; cons=[])
 
     if (is_corner(maze, p1) || is_deadend(maze, p1)) && (is_corner(maze, p2) || is_deadend(maze, p2)) && (length(cons) == 0 || visual_m in cons)
         @inbounds for m in ["move ", "go ", "walk "]
-            @inbounds for adv in ["forward ", "straight ", ""]
+            @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                 @inbounds for sufx in ["hall", "hallway", "path", "corridor", "alley", ""]
                     if sufx != ""
                         push!(cands, (string(m, adv, "to the other end of the ", sufx), visual_m))
@@ -445,7 +445,7 @@ function moveins(navimap, maze, curr, next; cons=[])
     elseif (is_corner(maze, p2) || is_deadend(maze, p2)) && (length(cons) == 0 || visual_m in cons)
         wpatrn, fpatrn = navimap.edges[(curr_s[1][1], curr_s[1][2])][(curr_s[2][1], curr_s[2][2])]
         @inbounds for m in ["move ", "go ", "walk "]
-            @inbounds for adv in ["forward ", "straight ", ""]
+            @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                 @inbounds for sufx in ["hall", "hallway", "path", "corridor", "alley", ""]
                     if sufx != ""
                         push!(cands, (string(m, adv, "all the way to the end of the ", sufx), visual_m))
@@ -493,10 +493,21 @@ function moveins(navimap, maze, curr, next; cons=[])
         if alleycnt > 0
             @inbounds for m in ["move", "go", "walk"]
                 @inbounds for cond in [" until the ", " to the "]
+                    @inbounds for cor in ["hall", "hallway", "alley", "corridor"]
+                        if alleycnt == 1
+                            push!(cands, (string(m, cond, "next ", cor), condition_m))
+                        else
+                            push!(cands, (string(m, cond, ordinals[alleycnt], " ", cor), condition_m))
+                        end
+                    end
+                end
+            end
+            @inbounds for cor in [" path ", " hall ", " hallway ", " alley ", " corridor "]
+                @inbounds for cor2 in ["hall", "hallway", "alley", "corridor"]
                     if alleycnt == 1
-                        push!(cands, (string(m, cond, "next alley"), condition_m))
+                        push!(cands, (string("take the", cor, "until the next ", cor2), condition_m))
                     else
-                        push!(cands, (string(m, cond, ordinals[alleycnt], " alley"), condition_m))
+                        push!(cands, (string("take the", cor, "until the ", ordinals[alleycnt], " ", cor2), condition_m))
                     end
                 end
             end
@@ -507,7 +518,7 @@ function moveins(navimap, maze, curr, next; cons=[])
         if visual_m in cons
             det = navimap.nodes[curr_s[end][1:2]] == 3 ? "an" : "a"
             @inbounds for m in ["go ", "move ", "walk "]
-                @inbounds for adv in ["forward ", "straight ", "", "on the path "]
+                @inbounds for adv in ["forward ", "straight ", "ahead ", "", "on the path "]
                     @inbounds for cond in ["till the ", "until the ", "toward the ", "towards the ", "until you get to ", "until you get $det ", "until you get to the ", "until you reach the ", "till you get to $det ", "to the "]
                         push!(cands, (string(m, adv, cond, rand(item_names[navimap.nodes[curr_s[end][1:2]]])), visual_m))
                     end
@@ -600,7 +611,7 @@ function moveins(navimap, maze, curr, next; cons=[])
                         rand(item_names[navimap.nodes[curr_s[end-1][1:2]]])), condition_m))
 
                     @inbounds for m in ["go ", "move ", "walk "]
-                        @inbounds for adv in ["forward ", "straight ", ""]
+                        @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                             push!(cands, (string(m, adv, num, st, body,
                                 rand(item_names[navimap.nodes[curr_s[end-1][1:2]]])), condition_m))
                         end
@@ -611,7 +622,7 @@ function moveins(navimap, maze, curr, next; cons=[])
         end
 
         @inbounds for m in ["go ", "move ", "walk "]
-            @inbounds for adv in ["forward ", "straight ", ""]
+            @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                 @inbounds for body in [" past ", " passing ", " passing the ", " passing $det "]
                     @inbounds for flr in vcat(floor_names[fpatrn], ColorMapping[fpatrn])
                         cors = [" path", " hall", " hallway", " alley", " corridor", "", " floor", " flooring"]
@@ -632,7 +643,7 @@ function moveins(navimap, maze, curr, next; cons=[])
         res, fpatrn = is_floor_unique(navimap, maze, curr_s, target)
         if res != 0
             @inbounds for m in ["move ", "go ", "walk "]
-                @inbounds for adv in ["forward ", "straight ", ""]
+                @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                     @inbounds for flr in vcat(floor_names[fpatrn], ColorMapping[fpatrn])
                         cors = [" path", " hall", " hallway", " alley", " corridor", "", " floor", " flooring"]
                         if flr == "flower" || flr == "octagon" || flr == "pink-flowered" || flr == "flowered" || flr == "rose"
@@ -663,7 +674,7 @@ function moveins(navimap, maze, curr, next; cons=[])
         res, fpatrn = is_floor_unique(navimap, maze, curr_s, target)
         if res != 0
             @inbounds for m in ["move ", "go ", "walk "]
-                @inbounds for adv in ["forward ", "straight ", "to the "]
+                @inbounds for adv in ["forward ", "straight ", "ahead ", "to the "]
                     @inbounds for flr in vcat(floor_names[fpatrn], ColorMapping[fpatrn])
                         cors = [" path", " hall", " hallway", " alley", " corridor", "", " floor", " flooring"]
                         if flr == "flower" || flr == "octagon" || flr == "pink-flowered" || flr == "flowered" || flr == "rose"
@@ -679,7 +690,7 @@ function moveins(navimap, maze, curr, next; cons=[])
 
         if res == 1
             @inbounds for m in ["move ", "go ", "walk "]
-                @inbounds for adv in ["forward ", "straight ", ""]
+                @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                     @inbounds for flr in vcat(floor_names[fpatrn], ColorMapping[fpatrn])
                         cors = [" path", " hall", " hallway", " alley", " corridor", "", " floor", " flooring"]
                         if flr == "flower" || flr == "octagon" || flr == "pink-flowered" || flr == "flowered" || flr == "rose"
@@ -696,7 +707,7 @@ function moveins(navimap, maze, curr, next; cons=[])
             end
         elseif res == 2
             @inbounds for m in ["move ", "go ", "walk "]
-                @inbounds for adv in ["forward ", "straight ", ""]
+                @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                     @inbounds for flr in vcat(floor_names[fpatrn], ColorMapping[fpatrn])
                         cors = [" path", " hall", " hallway", " alley", " corridor", "", " floor", " flooring"]
                         if flr == "flower" || flr == "octagon" || flr == "pink-flowered" || flr == "flowered" || flr == "rose"
@@ -713,7 +724,7 @@ function moveins(navimap, maze, curr, next; cons=[])
             end
         elseif res == 3
             @inbounds for m in ["move ", "go ", "walk "]
-                @inbounds for adv in ["forward ", "straight ", ""]
+                @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                     @inbounds for flr in vcat(floor_names[fpatrn], ColorMapping[fpatrn])
                         cors = [" path", " hall", " hallway", " alley", " corridor", "", " floor", " flooring"]
                         if flr == "flower" || flr == "octagon" || flr == "pink-flowered" || flr == "flowered" || flr == "rose"
@@ -729,7 +740,7 @@ function moveins(navimap, maze, curr, next; cons=[])
             end
 
             @inbounds for m in ["move ", "go ", "walk "]
-                @inbounds for adv in ["forward ", "straight ", ""]
+                @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                     @inbounds for c in ColorMapping[fpatrn]
                         push!(cands, (string(m, adv, "until you reach the ", c, " intersection"), condition_m))
                     end
@@ -737,7 +748,7 @@ function moveins(navimap, maze, curr, next; cons=[])
             end
 
             @inbounds for m in ["move ", "go ", "walk "]
-                @inbounds for adv in ["forward ", "straight ", ""]
+                @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                     @inbounds for flr1 in vcat(floor_names[fp], ColorMapping[fp])
                         @inbounds for flr2 in vcat(floor_names[fpatrn], ColorMapping[fpatrn])
                             push!(cands, (string(m, adv, "until you reach an intersection with ",
@@ -1048,7 +1059,7 @@ function turnmoveins(navimap, maze, curr, next, next2; cons=[])
     
     if is_corner(maze, p1) && is_corner(maze, p2) && (length(cons) == 0 || visual_tm in cons)
         @inbounds for m in ["move ", "go ", "walk "]
-            @inbounds for adv in ["forward ", "straight ", ""]
+            @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                 @inbounds for sufx in ["hall", "hallway", "path", "corridor", "alley", ""]
                     if sufx != ""
                         push!(cands, (string(m, adv, "all the way to the end of the ", sufx), visual_tm))
@@ -1064,11 +1075,16 @@ function turnmoveins(navimap, maze, curr, next, next2; cons=[])
                 end
             end
         end
+
+       @inbounds for sufx in ["hall", "hallway", "path", "corridor", "alley"]
+           push!(cands, (string("turn and take the ", sufx, " towards the end"), visual_tm))
+           push!(cands, (string("take the ", sufx, " towards the end"), visual_tm))
+       end
     end
 
     if is_deadend(maze, p2) && (length(cons) == 0 || visual_tm in cons)
         @inbounds for m in ["move ", "go ", "walk "]
-            @inbounds for adv in ["forward ", "straight ", ""]
+            @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                 push!(cands, (string(m, adv, "to the deadend"), visual_tm))
                 push!(cands, (string(m, adv, "to the dead end"), visual_tm))
                 push!(cands, (string("turn and ", m, adv, "to the deadend", sufx), visual_tm))
@@ -1080,7 +1096,7 @@ function turnmoveins(navimap, maze, curr, next, next2; cons=[])
     if navimap.nodes[next_s[end][1:2]] != 7 && item_single_in_visible(navimap, navimap.nodes[next_s[end][1:2]], curr_s[1][1:2]) == 1 &&
         (length(cons) == 0 || visual_tm in cons)
         @inbounds for v in ["move ", "go ", "walk "]
-            @inbounds for m in ["forward ", "straight ", ""]
+            @inbounds for m in ["forward ", "straight ", "ahead ", ""]
                 @inbounds for to in ["towards the ", "toward the ", "to the "]
                     push!(cands, (string(v, m, to, rand(item_names[navimap.nodes[next_s[end][1:2]]])), visual_tm))
                     @inbounds for tv in ["turn and ", "face and ", ""]
@@ -1134,7 +1150,7 @@ function turnmoveins(navimap, maze, curr, next, next2; cons=[])
                         rand(item_names[navimap.nodes[next_s[end-1][1:2]]])), langonly_t, condition_m))
 
                     @inbounds for m in ["go ", "move ", "walk "]
-                        @inbounds for adv in ["forward ", "straight ", ""]
+                        @inbounds for adv in ["forward ", "straight ", "ahead ", ""]
                             push!(cands, (string(tprefx, m, adv, num, st, body,
                                 rand(item_names[navimap.nodes[next_s[end-1][1:2]]])), langonly_t, condition_m))
                         end
