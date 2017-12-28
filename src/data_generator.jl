@@ -54,12 +54,13 @@ function move_to_x(name, id)
         nodes, path = generate_path(maze, available)
         segments = segment_path(nodes)
         gen = generate_lang(navimap, maze, segments; combine=0.0, cons=[visual_m])
+        acts = rand(1:4)
         if rand() <= 0.3
             reverse!(gen)
         end
         for (s, inst) in gen
             cats = inst[2:end]
-            if length(cats) == 1 && cats[1] == visual_m
+            if length(cats) == 1 && cats[1] == visual_m && length(s) >= acts
                 ins = Instruction(name, split(inst[1]), s, mname, id)
                 push!(inslist, ins)
                 id += 1
@@ -119,6 +120,7 @@ function lang_only(name, id)
 
         l = rand(1:3)
         l = l > 1 ? 2 : 1
+        acts = rand(1:5)
         gen = generate_lang(navimap, maze, segments; combine=(l == 2 ? 1.0 : 0.0), cons=[langonly_t, langonly_m, langonly_s])
         if rand() <= 0.4
             shuffle!(gen)
@@ -133,7 +135,7 @@ function lang_only(name, id)
                 end
             end
 
-            if langvalid && length(cats) == l
+            if langvalid && length(cats) == l && length(s) >= acts
                 ins = Instruction(name, split(inst[1]), s, mname, id)
                 push!(inslist, ins)
                 id += 1
@@ -339,12 +341,13 @@ function move_until(name, id)
 
     while length(inslist) == 0
         maze, available = generate_maze(h, w; numdel=1)
-        navimap = generate_navi_map(maze, ""; itemcountprobs=[0.0 0.0 0.05 0.05 0.1 0.1 0.1 0.1 0.1 0.2 0.2], iprob=0.6)
+        navimap = generate_navi_map(maze, ""; itemcountprobs=[0.0 0.0 0.05 0.05 0.1 0.1 0.1 0.1 0.1 0.2 0.2], iprob=0.7)
         nodes, path = generate_path(maze, available)
         segments = segment_path(nodes)
         mname = join(rand(CHARS, 40))
         navimap.name = mname
         gen = generate_lang(navimap, maze, segments; combine=1.0, cons=[condition_m])
+        acts = rand(2:4)
         if rand() <= 0.3
             reverse!(gen)
         end
@@ -352,7 +355,7 @@ function move_until(name, id)
         for (s, inst) in gen
             cats = inst[2:end]
 
-            if length(cats) == 1 && cats[1] == condition_m
+            if length(cats) == 1 && cats[1] == condition_m && length(s) > acts
                 ins = Instruction(name, split(inst[1]), s, mname, id)
                 push!(inslist, ins)
             end
@@ -662,15 +665,21 @@ function generate_unique_data(taskf; numins=100)
         rep = get_path_rep()
 
         if haskey(collection, text)
-            if haskey(collection[text], length(instance.path))
-                set = collection[text][length(instance.path)]
-                if !(rep in set)
-                    push!(set, rep)
-                    in_collection = false
+            if length(collection[text]) < 5
+                if !haskey(collection[text], length(instance.path))
+                    passed = true
+                    for k in keys(collection[text])
+                        set = collection[text][k]
+                        if rep in set
+                            passed = false
+                            break
+                        end
+                    end
+                    if passed
+                        collection[text][length(instance.path)] = Set{String}([rep])
+                        in_collection = false
+                    end
                 end
-            else
-                collection[text][length(instance.path)] = Set{String}([rep])
-                in_collection = false
             end
         else
             collection[text] = Dict{Int, Set{String}}(length(instance.path) => Set{String}([rep]))
@@ -693,7 +702,7 @@ function generate_unique_data(taskf; numins=100)
                 mps[mp.name] = mp
                 inscount += 1
             else
-                println("$inscount ** In the collection")
+                println("$taskf - $inscount ** In the collection")
             end
 
             if inscount == numins
