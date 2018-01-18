@@ -573,7 +573,7 @@ end
 
 any_combination(name, id) = rand([move_vis_turn_lang, turn_vis_move_lang, move_lang_turn_vis, turn_lang_move_vis, move_vis_turn_vis, turn_vis_move_vis])(name, id)
 
-function all_classes(name, id)
+function norestriction(name, id)
     h,w = (8,8)
     inslist = Any[]
     navimap = nothing
@@ -586,11 +586,14 @@ function all_classes(name, id)
     navimap.name = mname
 
     gen = generate_lang(navimap, maze, segments; combine=0.4)
+    acts = rand(1:5)
 
     for (s, inst) in gen
-        ins = Instruction(name, split(inst[1]), s, mname, id)
-        push!(inslist, ins)
-        id += 1
+        if length(s) > acts
+            ins = Instruction(name, split(inst[1]), s, mname, id)
+            push!(inslist, ins)
+            id += 1
+        end
     end
     return inslist, navimap
 end
@@ -619,7 +622,7 @@ turn_vis_move_vis : both parts require the perceptual information
 
 any_combination : one of the visual task that contains two segment
 
-all_classes : random task
+norestriction : random task
 """
 
 function generatedata(taskf; numins=100)
@@ -645,7 +648,7 @@ end
 Collection::Dict{Instruction, Dict{Length, Set{String representation of a path}}}
 """
 function generate_unique_data(taskf; numins=100)
-    collection = Dict{String, Dict{Int, Set{String}}}()
+    collection = Dict{String, Dict{Any, Set{String}}}()
     
     #check whether new instance in the collection or not
     #add the new instance to the collection if it is not in the collection
@@ -665,8 +668,8 @@ function generate_unique_data(taskf; numins=100)
         rep = get_path_rep()
 
         if haskey(collection, text)
-            if length(collection[text]) < 5
-                if !haskey(collection[text], length(instance.path))
+            if length(collection[text]) < 10
+                if !haskey(collection[text], instance.path)
                     passed = true
                     for k in keys(collection[text])
                         set = collection[text][k]
@@ -676,7 +679,7 @@ function generate_unique_data(taskf; numins=100)
                         end
                     end
                     if passed
-                        collection[text][length(instance.path)] = Set{String}([rep])
+                        collection[text][instance.path] = Set{String}([rep])
                         in_collection = false
                     end
                 end

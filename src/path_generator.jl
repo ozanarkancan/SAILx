@@ -1,4 +1,4 @@
-function generate_path(maze, available; distance=6)
+function generate_path(maze, available; distance=4)
     h,w,_ = size(maze)
     rp = shuffle(collect(available))
 

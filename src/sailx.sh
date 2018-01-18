@@ -1,4 +1,12 @@
 #!/bin/bash
 
 echo "Unique data generation"
-julia generate_data.jl --num 70000 25000 80000 35000 25000 70000 32000 115000 115000 --folder ../unique/ --unique --tasks turn_to_x move_to_x combined_12 turn_and_move_to_x lang_only combined_1245 move_until any_combination all_classes
+julia generate_data.jl --num 75000 --folder ../unique/ --unique --tasks turn_to_x
+julia generate_data.jl --num 30000 --folder ../unique/ --unique --tasks move_to_x
+julia generate_data.jl --num 90000 --folder ../unique/ --unique --tasks combined_12
+julia generate_data.jl --num 35000 --folder ../unique/ --unique --tasks turn_and_move_to_x
+julia generate_data.jl --num 30000 --folder ../unique/ --unique --tasks lang_only
+julia generate_data.jl --num 85000 --folder ../unique/ --unique --tasks combined_1245
+julia generate_data.jl --num 32500 --folder ../unique/ --unique --tasks move_until
+julia generate_data.jl --num 150000 --folder ../unique/ --unique --tasks any_combination
+julia generate_data.jl --num 200000 --folder ../unique/ --unique --tasks norestriction
