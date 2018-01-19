@@ -522,16 +522,6 @@ function moveins(navimap, maze, curr, next; cons=[])
                     @inbounds for cond in ["till the ", "until the ", "toward the ", "towards the ", "until you get to ", "until you get $det ", "until you get to the ", "until you reach the ", "till you get to $det ", "to the "]
                         push!(cands, (string(m, adv, cond, rand(item_names[navimap.nodes[curr_s[end][1:2]]])), visual_m))
                     end
-                    @inbounds for num in numbers[steps]
-                        @inbounds for st in sts
-                            @inbounds for tow in [" to", " towards", " toward"]
-                                @inbounds for suffix in [" the intersection containing the ", " the intersection with $det ", " the intersection has $det "]
-                                    push!(cands, (string(m, adv, num, st, tow, suffix,
-                                        rand(item_names[navimap.nodes[curr_s[end][1:2]]])), visual_m))
-                                end
-                            end
-                        end
-                    end
                 end
             end
 
@@ -653,11 +643,7 @@ function moveins(navimap, maze, curr, next; cons=[])
                             det = flr == "octagan" ? "an" : "a"
                             @inbounds for cond in [" to the intersection with the ", " to the ", " toward the ", " towards the intersection of ", " to the intersection with $det "]
                                 push!(cands, (string(m, adv, cond, flr, cor), visual_m))
-                                @inbounds for st in sts
-                                    @inbounds for num in numbers[steps]
-                                        push!(cands, (string(m, adv, num, st, cond, flr, cor), visual_m))
-                                    end
-                                end
+                                                            
                             end
                         end
                     end
