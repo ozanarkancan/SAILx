@@ -386,11 +386,6 @@ function moveins(navimap, maze, curr, next; cons=[])
                     @inbounds for prep in [" into the$emp corner", " to the$emp corner", " to the next corner"]
                         @inbounds for suffix in ["", " you see in front of you"]
                             push!(cands, (string(m, adv, prep, suffix), visual_m))
-                            @inbounds for st in sts
-                                @inbounds for num in numbers[steps]
-                                    push!(cands, (string(m, adv, " ", num, st, prep, suffix), visual_m))
-                                end
-                            end
                         end
                     end
                 end
@@ -409,14 +404,6 @@ function moveins(navimap, maze, curr, next; cons=[])
 
                 push!(cands, (string(m, adv, "until you get to a deadend"), visual_m))
                 push!(cands, (string(m, adv, "until you get to a dead end"), visual_m))
-
-                @inbounds for st in sts
-                    @inbounds for num in numbers[steps]
-                        push!(cands, (string(m, adv, st, num, st, " into the dead end"), visual_m))
-                        push!(cands, (string(m, adv, st, num, st, " into the deadend"), visual_m))
-                    end
-                end
-
             end
         end
     end
@@ -429,15 +416,6 @@ function moveins(navimap, maze, curr, next; cons=[])
                         push!(cands, (string(m, adv, "to the other end of the ", sufx), visual_m))
                     else
                         push!(cands, (string(m, adv, "to the other end"), visual_m))
-                    end
-                    @inbounds for st in sts
-                        @inbounds for num in numbers[steps]
-                            if sufx != ""
-                                push!(cands, (string(m, adv, num, st, " to the other end of the ", sufx), visual_m))
-                            else
-                                push!(cands, (string(m, adv, num, st, " to the other end"), visual_m))
-                            end
-                        end
                     end
                 end
             end
@@ -457,17 +435,6 @@ function moveins(navimap, maze, curr, next; cons=[])
                         push!(cands, (string(m, adv, "to end"), visual_m))
 
                     end
-                    
-                    @inbounds for st in sts
-                        @inbounds for num in numbers[steps]
-                            if sufx != ""
-                                push!(cands, (string(m, adv, num, st, " all the way to the end of the ", sufx), visual_m))
-                                push!(cands, (string(m, adv, num, st, " to the end of the ", sufx), visual_m))
-                            else
-                                push!(cands, (string(m, adv, num, st, " to the end"), visual_m))
-                            end
-                        end
-                    end
                 end
                 @inbounds for flr in vcat(floor_names[fpatrn], ColorMapping[fpatrn])
                     cors = [" path", " hall", " hallway", " alley", " corridor", "", " floor", " flooring"]
@@ -476,12 +443,6 @@ function moveins(navimap, maze, curr, next; cons=[])
                     end
                     @inbounds for cor in cors
                         push!(cands, (string(m, adv, "to the end of the ", flr, cor), visual_m))
-                        @inbounds for st in sts
-                            @inbounds for num in numbers[steps]
-                                push!(cands, (string(m, adv, num, st, " to the end of the ", flr, cor), visual_m))
-                                push!(cands, (string(m, adv, "to the end of the ", flr, cor, " ", num, st), visual_m))
-                            end
-                        end
                     end
                 end
             end
@@ -521,17 +482,6 @@ function moveins(navimap, maze, curr, next; cons=[])
                 @inbounds for adv in ["forward ", "straight ", "ahead ", "", "on the path "]
                     @inbounds for cond in ["till the ", "until the ", "toward the ", "towards the ", "until you get to ", "until you get $det ", "until you get to the ", "until you reach the ", "till you get to $det ", "to the "]
                         push!(cands, (string(m, adv, cond, rand(item_names[navimap.nodes[curr_s[end][1:2]]])), visual_m))
-                    end
-                end
-            end
-
-            @inbounds for v in ["take ", "", "follow this path ", "follow this hall ", "follow this hallway "]
-                @inbounds for num in numbers[steps]
-                    @inbounds for st in sts
-                        @inbounds for tow in [" to", " towards", " toward"]
-                            push!(cands, (string(v, num, st, tow, " the intersection containing the ",
-                                rand(item_names[navimap.nodes[curr_s[end][1:2]]])), visual_m))
-                        end
                     end
                 end
             end
