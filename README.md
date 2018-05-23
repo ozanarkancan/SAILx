@@ -1,17 +1,21 @@
 # SAILx
 
+This repo contains code to generate artificial data described in: *A new dataset
+and model for learning to understand navigational instructions*
+
+https://arxiv.org/abs/1805.07952
+
 To generate the fixed dataset:
 
 ```bash
 sh sailx.sh
 ```
-or you can download from the [link](http://ai.ku.edu.tr/download/sailxdataset.tar.gz)
 
 To generate the data used in the efficiency experiments:
 ```bash
 sh tasks.sh
 ```
-You can generate data for specific tasks by using the generatedata.jl. It will create a folder for each subtask and generates instructions.json and corresponding maps.json.
+You can generate data for specific tasks by using the generatedata.jl. It will create a folder for each subtask and generate instructions.json and corresponding maps.json.
 
 ```julia
 Example: julia generate_data.jl --num 15000 --folder ../unique_sailx/ --unique --tasks turn_to_x --seed 123789
@@ -69,4 +73,13 @@ Walls = Dict("butterfly" => 1, "fish" => 2, "tower" => 3)
 
 Floors = Dict("blue" => 1, "brick" => 2, "concrete" => 3, "flower" => 4,
     "grass" => 5, "gravel" => 6, "wood" => 7, "yellow" => 8)
+```
+
+### Dependencies (Julia Packages):
+```
+Logging
+ArgParse
+JLD
+JSON
+DataStructures
 ```
