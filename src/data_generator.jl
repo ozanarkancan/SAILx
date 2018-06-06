@@ -705,7 +705,7 @@ function generate_unique_data(taskf; numins=100)
                 mps[mp.name] = mp
                 inscount += 1
             else
-                println("$taskf - $inscount ** In the collection")
+                print("\r$taskf - $inscount ** In the collection")
             end
 
             if inscount == numins
