@@ -139,7 +139,7 @@ function startins(navimap, maze, curr, next; cons=[])
         end
 
         if d != "" && diff_f && (length(cons) == 0 || visual_t in cons)
-            @inbounds for cor in [" corridor", " hall", " alley", " hallway", " path", "", " floor", "flooring"]
+            @inbounds for cor in [" corridor", " hall", " alley", " hallway", " path", "", " floor", " flooring"]
                 @inbounds for v in ["take a $d into ", "make a $d into ", "take a $d onto ", "make a $d onto ","turn $d into ", "turn $d onto ", "turn $d to face "]
                     @inbounds for det in ["the ", ""]
                         @inbounds for flr in vcat(floor_names[fpatrn], ColorMapping[fpatrn])
